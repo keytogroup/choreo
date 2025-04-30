@@ -1,0 +1,152 @@
+openapi: 3.0.3
+info:
+  title: Email Sending API
+  version: 1.0.0
+  description: API for sending emails with flexible configuration
+  contact:
+    name: API Support
+    email: support@company.com
+
+servers:
+  - url: https://api.company.com/v1
+    description: Production Email Service
+
+paths:
+  /emails:
+    post:
+      summary: Send an email
+      description: Endpoint to send an email with configurable parameters
+      operationId: sendEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+            examples:
+              simpleEmail:
+                value:
+                  to: ["recipient@example.com"]
+                  subject: "Hello from API"
+                  body: "This is a test email"
+              complexEmail:
+                value:
+                  to: ["primary@example.com", "cc@example.com"]
+                  subject: "Important Notification"
+                  body: "Detailed message content"
+                  cc: ["manager@company.com"]
+                  replyTo: "support@company.com"
+
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailResponse'
+              example:
+                status: "success"
+                messageId: "unique-message-identifier"
+                timestamp: "2023-11-15T10:30:45Z"
+
+        '400':
+          description: Invalid email request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Invalid email parameters"
+                details: "Missing required recipient email"
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Email sending failed"
+                details: "SMTP server connection error"
+
+components:
+  schemas:
+    EmailRequest:
+      type: object
+      required: 
+        - to
+        - subject
+        - body
+      properties:
+        to:
+          type: array
+          items:
+            type: string
+            format: email
+          minItems: 1
+          description: Primary recipient email addresses
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Carbon copy recipient email addresses
+        bcc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Blind carbon copy recipient email addresses
+        subject:
+          type: string
+          maxLength: 998
+          description: Email subject line
+        body:
+          type: string
+          description: Email body content
+        replyTo:
+          type: string
+          format: email
+          description: Reply-to email address
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              filename:
+                type: string
+              content:
+                type: string
+                format: byte
+            required:
+              - filename
+              - content
+
+    EmailResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["success", "partial", "failed"]
+        messageId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
+security:
+  - ApiKeyAuth: []
