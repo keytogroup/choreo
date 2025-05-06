@@ -4,10 +4,5 @@ name = "sftp"
 version = "0.1.0"
 
 [build-options]
+cloud = "docker"
 observabilityIncluded = true
-
-# Explicitly include the commons-lang3 dependency to resolve conflict
-[[platform.java11.dependency]]
-artifactId = "commons-lang3"
-groupId = "org.apache.commons"
-version = "3.17.0"
